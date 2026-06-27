@@ -1,0 +1,40 @@
+import { prisma } from "./lib/prisma";
+
+async function main() {
+    const user = await prisma.user.create({
+        data: {
+            name: "MD Parvez Hasan-1",
+            email: "parvez1@gmail.com",
+            posts: {
+                create: {
+                    title: "Second Post",
+                    content: "This is the second post of my prisma application",
+                    published: true
+                }
+
+            }
+        },
+        include: {
+            posts: true
+        }
+    })
+    console.log("Created user:", user);
+
+    // Fetch all users with their posts
+    const allUsers = await prisma.user.findMany({
+        include: {
+            posts: true,
+        },
+    });
+    console.log("All users:", JSON.stringify(allUsers, null, 2));
+}
+
+main()
+    .then(async () => {
+        await prisma.$disconnect();
+    })
+    .catch(async (e) => {
+        console.error(e);
+        await prisma.$disconnect();
+        process.exit(1);
+    });
