@@ -1,5 +1,6 @@
 import type { JwtPayload } from "jsonwebtoken";
 import jwt from "jsonwebtoken";
+import { config } from "../config";
 
 const createToken = (
   payload: JwtPayload,
@@ -17,4 +18,13 @@ const createToken = (
   return token;
 };
 
-export const jwtUtils = { createToken };
+const verifyToken = (token: string) => {
+  try {
+    const verifiedToken = jwt.verify(token, config.jwt_access_token_secret);
+    return verifiedToken;
+  } catch (error) {
+    throw new Error("Invalid Token");
+  }
+}
+
+export const jwtUtils = { createToken, verifyToken };

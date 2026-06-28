@@ -15,25 +15,13 @@ const registerUserIntoDB = async (payload: UserPayload) => {
             name,
             email,
             password: hashedPassword,
-            profile:{
+            profile: {
                 create: {
                     profileImage: profileImage || null
                 }
             }
         }
     });
-    // console.log("User created successfully:", createdUser);
-    // if (createdUser.id) {
-    //     // await prisma.profile.create({
-    //     //     data: {
-    //     //         user_id: createdUser?.id,
-    //     //         // profileImage: profileImage || null
-    //     //     }
-    //     // });
-    // }
-    // else {
-    //     console.log("User creation failed, profile not created.");
-    // }
 
     const user = await prisma.user.findUnique({
         where: {
@@ -48,6 +36,27 @@ const registerUserIntoDB = async (payload: UserPayload) => {
     });
 
     return user;
+};
+
+const getUserProfileFromDB = async (user_id: any) => {
+    const userProfile = await prisma.user.findUniqueOrThrow({
+        where: { id: user_id },
+        omit: {
+            password: true
+        },
+        include: {
+            profile: true
+        }
+    });
+    return userProfile;
+};
+
+const updateUserProfileIntoDB = async (user_id: string, payload: any) => {
+    const user = await prisma.profile.update({
+        where: { user_id },
+        data: payload
+    })
+    return user;
 }
 
-export const userService = { registerUserIntoDB }
+export const userService = { registerUserIntoDB, getUserProfileFromDB, updateUserProfileIntoDB };

@@ -20,7 +20,7 @@ app.get('/', async (req: Request, res: Response) => {
     res.send('Prisma Press Server in Running !')
 });
 
-app.use('/api', userRouter);
+app.use('/api/users', userRouter);
 app.use("/api/auth",authRouter)
 
 export default app;

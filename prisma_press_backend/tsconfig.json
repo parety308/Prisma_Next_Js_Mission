@@ -8,21 +8,16 @@
     "types": [
       "node"
     ],
-    "sourceMap": true,
-    "declaration": true,
-    "declarationMap": true,
     "strict": true,
     "esModuleInterop": true,
-    "verbatimModuleSyntax": true,
-    "isolatedModules": true,
     "skipLibCheck": true
   },
   "include": [
-    "src/**/*"
+    "src/**/*",
+    "src/types/**/*.d.ts"
   ],
   "exclude": [
     "node_modules",
-    "dist",
-    "catchAsyncs.ts"
+    "dist"
   ]
 }
