@@ -9,6 +9,8 @@ model User {
   updatedAt     DateTime     @default(now())
 
   profile       Profile?
+  comments      Comment[]
+  posts         Post[]
 
   @@map("users")
 }

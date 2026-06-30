@@ -3,6 +3,8 @@ import { catchAsync } from "../utils/catchAsync";
 import { jwtUtils } from "../utils/jwt";
 import { sendResponse } from "../utils/sendResponse";
 import HttpStatus from "http-status-codes";
+import { config } from "../config";
+import { JwtPayload } from "jsonwebtoken";
 
 const auth = (requiredRoles: string[]) => {
     return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
@@ -13,14 +15,14 @@ const auth = (requiredRoles: string[]) => {
         if (!token) {
             throw new Error("Unauthorized Access");
         }
-        const user = jwtUtils.verifyToken(token);
-        if (typeof user === "string") {
-            throw new Error(user);
+        const user = jwtUtils.verifyToken(token, config.jwt_access_token_secret);
+          if (!user.success) {
+            throw new Error(user.error);
         }
         if (!user) {
             throw new Error("User not found");
         }
-        const { id, email, role, name } = user;
+        const { id, email, role, name } = user.data as JwtPayload;
         if (requiredRoles.length && !requiredRoles.includes(role)) {
             sendResponse(res, {
                 success: false,

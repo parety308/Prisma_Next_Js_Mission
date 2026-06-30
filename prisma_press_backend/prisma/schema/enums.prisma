@@ -8,3 +8,14 @@ enum ActiveStatus {
   active
   blocked
 }
+
+enum PostStatus {
+  draft
+  published
+  archieve
+}
+
+enum CommentStatus {
+  approved
+  rejected
+}

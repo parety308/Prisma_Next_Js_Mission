@@ -1,0 +1,18 @@
+model Post {
+    id         String     @id @default(uuid())
+    title      String     @db.VarChar(255)
+    content    String      @db.Text
+    thumbnail  String?
+    isFeatured Boolean    @default(false)
+    status     PostStatus @default(published)
+    tags       String[]
+    views      Int        @default(0)
+    author_id  String
+    author     User       @relation(fields: [author_id], references: [id])
+    createdAt  DateTime   @default(now())
+    updatedAt  DateTime   @default(now())
+    comments   Comment[]
+
+    @@index([author_id])
+    @@map("posts")
+}
