@@ -5,7 +5,11 @@ import { sendResponse } from "../../utils/sendResponse";
 import HttpStatus from "http-status-codes";
 
 const getAllPosts = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const result = await postService.getAllPostsFromDB();
+
+    const query = req.query;
+    console.log(query);
+
+    const result = await postService.getAllPostsFromDB(query);
     sendResponse(res, {
         success: true,
         statusCode: HttpStatus.OK,

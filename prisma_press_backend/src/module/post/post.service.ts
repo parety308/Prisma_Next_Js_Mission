@@ -1,10 +1,176 @@
 import { CommentStatus, PostStatus } from "../../../generated/prisma/enums";
+import { PostWhereInput } from "../../../generated/prisma/models";
 import { prisma } from "../../lib/prisma";
-import { TCreatePostPayload, TUpdatePostPayload } from "./post.interface";
+import { IPostQuery, TCreatePostPayload, TUpdatePostPayload } from "./post.interface";
 
 
-const getAllPostsFromDB = async () => {
-    const result = await prisma.post.findMany();
+const getAllPostsFromDB = async (query: IPostQuery) => {
+    const limit = query.limit ? Number(query.limit) : 3;
+    const page = query.page ? Number(query.page) : 1;
+    const sortBy = query.sortBy ?? "createdAt";
+    const sortOrder = query.sortOrder ?? "desc";
+    const tags = JSON.parse(query.tags as string) ?? null;
+    const tagsArray = Array.isArray(query.tags) ? tags : [];
+    const andCondition: PostWhereInput[] = []
+    if (query.searchTerm) {
+        andCondition.push({
+            OR: [
+                {
+                    title: {
+                        contains: query.searchTerm,
+                        mode: 'insensitive'
+                    }
+                },
+                {
+                    content: {
+                        contains: query.searchTerm,
+                        mode: 'insensitive'
+                    }
+                }
+            ]
+        })
+    }
+
+    if (query.title) {
+        andCondition.push({
+            title: query.title
+        });
+    }
+
+    if (query.content) {
+        andCondition.push({
+            content: query.content
+        });
+    }
+
+    if (query.author_id) {
+        andCondition.push({
+            author_id: query.author_id
+        });
+    }
+
+    if (query.isFeatured) {
+        andCondition.push({
+            isFeatured: Boolean(query.isFeatured)
+        });
+    }
+
+    if (query.tags) {
+        andCondition.push({
+            tags: {
+                hasSome: tagsArray
+            }
+        })
+    }
+    if (query.status) {
+        andCondition.push({
+            status: query.status
+        })
+    }
+    const result = await prisma.post.findMany({
+        // where: {
+        //implement filtering (exact match)
+        // AND: [
+        //     {
+        //         title: "My Second Post"
+        //     },
+        //     {
+        //         content: "Content of the post goes here-2."
+        //     }
+        // ]
+
+
+        //searching or partial match
+
+        // title:{
+        //     contains:"post",
+        //     mode:"insensitive"
+        // }
+
+        //searching or partial match using or
+        // OR: [{
+        //     title: {
+        //         contains: "first",
+        //         mode: "insensitive"
+        //     }
+        // },
+        // {
+        //     content:{
+        //         contains:"here-2"
+        //     }
+        // }
+        //     ]
+
+        //filtering and searching combine
+
+        // AND: [{
+        //     OR: [{
+        //         title: {
+        //             contains: "first",
+        //             mode: "insensitive"
+        //         }
+        //     },
+        //     {
+        //         content: {
+        //             contains: "here-2"
+        //         }
+        //     }
+        //     ]
+        // },
+        // {
+        //     title: "My First Post"
+        // }, {
+        //     content: "content of first post"
+        // }
+
+        // ]
+        // },
+
+
+        where: {
+            // AND: [
+            //     //searching
+            //     query.searchTerm ? {
+            //         OR: [
+            //             {
+            //                 title: {
+            //                     contains: query.searchTerm,
+            //                     mode: 'insensitive'
+            //                 }
+            //             },
+            //             {
+            //                 content: {
+            //                     contains: query.searchTerm,
+            //                     mode: 'insensitive'
+            //                 }
+            //             }
+            //         ]
+            //     } : {},
+
+
+            //     //title filtering
+
+            //     query.title ? { title: query.title } : {},
+            //     query.content ? { content: query.content } : {}
+            // ]
+        }
+        ,
+        take: limit,
+        skip: (page - 1) * limit,
+        orderBy: {
+            [sortBy]: sortOrder
+        },
+        include: {
+            author: {
+                omit: {
+                    password: true,
+                    createdAt: true,
+                    updatedAt: true
+                }
+            },
+            comments: true
+        }
+    });
     return result;
 };
 
